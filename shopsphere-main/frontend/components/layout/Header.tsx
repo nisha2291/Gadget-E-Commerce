@@ -4,9 +4,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { useAuth } from "@/lib/auth";
+import { useCart } from "@/lib/cart";
 
 export default function Header() {
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
+  const { cartCount } = useCart(); // ✅ shared state, no local fetch needed
   const router = useRouter();
 
   const [query, setQuery] = useState("");
@@ -103,14 +105,12 @@ export default function Header() {
               Home
             </Link>
 
-
-
-<Link
-  href="/about"
-  className="rounded-lg px-3 py-2 text-sm font-medium text-white/90 transition hover:bg-white/10 hover:text-secondary"
->
-  About
-</Link>
+            <Link
+              href="/about"
+              className="rounded-lg px-3 py-2 text-sm font-medium text-white/90 transition hover:bg-white/10 hover:text-secondary"
+            >
+              About
+            </Link>
 
             <Link
               href="/cart"
@@ -121,7 +121,6 @@ export default function Header() {
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
-                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"
@@ -130,7 +129,12 @@ export default function Header() {
                   d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13 5.4 5M7 13l-2 3h13m-10 4a1 1 0 1 1-2 0 1 1 0 0 1 2 0Zm10 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"
                 />
               </svg>
-              Cart
+
+              <span>Cart</span>
+
+              <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-xs text-white">
+                {cartCount}
+              </span>
             </Link>
 
             {isAuthenticated ? (

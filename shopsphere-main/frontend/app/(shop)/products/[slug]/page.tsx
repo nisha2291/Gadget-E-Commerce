@@ -47,6 +47,8 @@ import {
   getVariantLabel,
 } from "@/lib/api";
 
+import { useCart } from "@/lib/cart"; // ✅ added
+
 import type {
   Product,
   ProductVariant,
@@ -249,6 +251,8 @@ export default function ProductDetailPage() {
     ? params.slug[0]
     : String(params.slug ?? "");
 
+  const { refreshCart } = useCart(); // ✅ added
+
   const [product, setProduct] =
     useState<Product | null>(null);
 
@@ -380,6 +384,8 @@ export default function ProductDetailPage() {
           selectedVariant?.id ?? null,
         quantity,
       });
+
+      await refreshCart(); // ✅ added — syncs Header's cart count instantly
 
       setCartNotice({
         type: "success",

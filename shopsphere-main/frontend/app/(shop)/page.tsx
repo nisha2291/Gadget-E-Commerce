@@ -9,6 +9,8 @@ import { PageLoader } from "@/components/ui/Spinner";
 import { catalogApi } from "@/lib/api";
 import type { Category } from "@/types";
 
+
+
 const categoryIcons: Record<string, string> = {
   laptop: "💻",
   laptops: "💻",
@@ -187,7 +189,7 @@ export default function HomePage() {
 
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link
-                  href="/smart-tv.png"
+                   href="/products/iphone"
                   className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#F59E0B] px-6 py-3 text-sm font-bold text-white shadow-lg transition duration-300 hover:-translate-y-0.5 hover:bg-[#dc8908] hover:shadow-xl"
                 >
                   Shop Now
@@ -257,7 +259,7 @@ export default function HomePage() {
                 </p>
 
                 <Link
-                  href="/search?q=smart%20watch"
+                  href="/products/watch"
                   className="mt-4 inline-flex items-center gap-1 text-xs font-black uppercase tracking-wide text-[#121358] underline decoration-2 underline-offset-4"
                 >
                   Shop now
@@ -267,7 +269,7 @@ export default function HomePage() {
 
               <div className="absolute bottom-1 right-0 h-[88%] w-[45%] transition duration-500 group-hover:scale-105 group-hover:-rotate-3">
                 <PromoImage
-                  src="/mobile.png"
+                  src="/watch1.png"
                   alt="Smart watch promotion"
                   fallback="⌚"
                   className="object-bottom"
@@ -297,7 +299,7 @@ export default function HomePage() {
                 </p>
 
                 <Link
-                  href="/search?q=wireless%20headphones"
+                  href="/products/earpods"
                   className="mt-4 inline-flex items-center gap-1 text-xs font-black uppercase tracking-wide text-white underline decoration-2 underline-offset-4"
                 >
                   Shop now
@@ -307,7 +309,7 @@ export default function HomePage() {
 
               <div className="absolute bottom-0 right-0 h-[90%] w-[48%] transition duration-500 group-hover:scale-105 group-hover:rotate-3">
                 <PromoImage
-                  src="/tablet.png"
+                  src="/earsbads.png"
                   alt="Wireless headphones promotion"
                   fallback="🎧"
                   className="object-bottom"
@@ -367,7 +369,7 @@ export default function HomePage() {
           </div>
 
           <Link
-            href="/search"
+            href="/products"
             className="inline-flex items-center gap-2 text-sm font-bold text-[#121358] transition hover:text-[#F59E0B]"
           >
             View all products

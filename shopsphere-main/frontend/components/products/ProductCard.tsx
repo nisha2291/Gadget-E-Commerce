@@ -8,16 +8,12 @@ import { useState, type MouseEvent } from "react";
 import { cartApi, formatPrice, STORAGE_BASE } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import type { Product } from "@/types";
+import { useCart } from "@/lib/cart";
 
 /*
 |--------------------------------------------------------------------------
 | Product image URL
 |--------------------------------------------------------------------------
-|
-| First it searches for the primary product image.
-| If no primary image exists, it uses the first image.
-| If no image exists, it uses the placeholder image.
-|
 */
 
 function getProductImageUrl(product: Product): string {
@@ -110,6 +106,7 @@ export default function ProductCard({
 }) {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
+  const { refreshCart } = useCart(); // ✅ inside the component
 
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
@@ -157,11 +154,6 @@ export default function ProductCard({
     event.preventDefault();
     event.stopPropagation();
 
-    /*
-     * Cart API requires the customer to be logged in.
-     * Send guests to the login page.
-     */
-
     if (!isAuthenticated) {
       const redirect =
         typeof window !== "undefined"
@@ -185,6 +177,8 @@ export default function ProductCard({
           selectedVariant?.id ?? null,
         quantity: 1,
       });
+
+      await refreshCart(); // ✅ instant shared-state update, no event roundtrip
 
       setAdded(true);
 
@@ -210,8 +204,6 @@ export default function ProductCard({
         className="block"
       >
         <div className="relative h-52 overflow-hidden rounded-xl bg-white sm:h-56 lg:h-60">
-          {/* Discount badge */}
-
           {discountPercentage !== null && (
             <span className="absolute left-0 top-0 z-10 rounded-md bg-amber-500 px-2.5 py-1 text-xs font-bold text-white">
               -{discountPercentage}%
@@ -229,15 +221,11 @@ export default function ProductCard({
       </Link>
 
       <div className="flex flex-1 flex-col pt-5">
-        {/* Brand or category */}
-
         <p className="text-sm text-gray-400">
           {product.brand ||
             product.category?.name ||
             "ShopSphere"}
         </p>
-
-        {/* Product name */}
 
         <Link
           href={`/products/${product.slug}`}
@@ -248,8 +236,6 @@ export default function ProductCard({
           </h3>
         </Link>
 
-        {/* Rating */}
-
         <div className="mt-3 flex items-center gap-2 text-sm">
           <RatingStars rating={rating} />
 
@@ -257,8 +243,6 @@ export default function ProductCard({
             ({reviewCount})
           </span>
         </div>
-
-        {/* Product price */}
 
         <div className="mt-4 flex min-h-8 items-center gap-2">
           {discountPercentage !== null && (
@@ -271,8 +255,6 @@ export default function ProductCard({
             {formatPrice(currentPrice)}
           </span>
         </div>
-
-        {/* Add to cart */}
 
         <button
           type="button"

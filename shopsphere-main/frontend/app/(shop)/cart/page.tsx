@@ -115,14 +115,17 @@ export default function CartPage() {
     setError("");
 
     try {
-      const updatedCart =
-        await cartApi.updateItem(
-          id,
-          quantity,
-        );
+  const updatedCart =
+    await cartApi.updateItem(
+      id,
+      quantity,
+    );
 
-      setCart(updatedCart);
-    } catch (error) {
+  setCart(updatedCart);
+
+  // Notify the navbar to refresh the cart count
+  window.dispatchEvent(new Event("cart-updated"));
+} catch (error) {
       console.error(
         "Unable to update cart item:",
         error,
@@ -149,12 +152,15 @@ export default function CartPage() {
     setUpdatingId(id);
     setError("");
 
-    try {
-      const updatedCart =
-        await cartApi.removeItem(id);
+try {
+  const updatedCart =
+    await cartApi.removeItem(id);
 
-      setCart(updatedCart);
-    } catch (error) {
+  setCart(updatedCart);
+
+  // Notify the navbar to refresh the cart count
+  window.dispatchEvent(new Event("cart-updated"));
+} catch (error) {
       console.error(
         "Unable to remove cart item:",
         error,

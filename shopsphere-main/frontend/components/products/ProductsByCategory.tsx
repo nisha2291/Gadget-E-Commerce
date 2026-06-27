@@ -23,6 +23,8 @@ import {
   getProductPrice,
 } from "@/lib/api";
 
+import { useCart } from "@/lib/cart"; // ✅ added
+
 import type {
   Product,
   ProductVariant,
@@ -152,6 +154,8 @@ function ProductCard({
   const [error, setError] =
     useState("");
 
+  const { refreshCart } = useCart(); // ✅ added
+
   const productImage =
     getProductImage(product);
 
@@ -224,6 +228,8 @@ function ProductCard({
        * backend request succeeds.
        */
       onProductAdded(product.id);
+
+      await refreshCart(); // ✅ added — instantly syncs Header's cart count
     } catch (error) {
       console.error(
         "Add to cart failed:",
@@ -684,6 +690,31 @@ export default function ProductsByCategory() {
                 }
               />
             ))}
+          </div>
+        )}
+
+        {/* View more products */}
+        {!loading && products.length > 0 && (
+          <div className="mt-10 flex justify-center">
+            <Link
+              href={`/products?category=${activeGroup}`}
+              className="
+                group relative inline-flex items-center gap-2
+                overflow-hidden rounded-2xl border-2 border-[#111858]
+                bg-white px-8 py-3.5 text-sm font-black
+                uppercase tracking-wide text-[#111858]
+                shadow-sm transition-all duration-300
+                hover:-translate-y-0.5 hover:bg-[#111858]
+                hover:text-white hover:shadow-lg
+                hover:shadow-blue-600/20
+              "
+            >
+              View More Products
+
+              <span className="transition-transform duration-300 group-hover:translate-x-1">
+                →
+              </span>
+            </Link>
           </div>
         )}
       </div>

@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { Target, ShieldCheck, TrendingUp, Award } from "lucide-react";
-
+import Link from "next/link";
 export default function AboutPage() {
   return (
     <div className="bg-white text-gray-800">
@@ -230,10 +230,14 @@ export default function AboutPage() {
           Contact our experts for fast, reliable, and professional support.
         </p>
 
-        <button className="mt-8 bg-yellow-400 text-black px-8 py-4 rounded-xl font-semibold hover:bg-yellow-300 transition">
-          Contact Us
-        </button>
 
+
+<Link
+  href="/contact"
+  className="mt-8 inline-block bg-yellow-400 text-black px-8 py-4 rounded-xl font-semibold hover:bg-yellow-300 transition"
+>
+  Contact Us
+</Link>
       </section>
 
     </div>

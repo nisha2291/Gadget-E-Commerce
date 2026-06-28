@@ -28,9 +28,12 @@ class ProductImage extends Model
     {
         return $this->belongsTo(Product::class);
     }
-
-    public function getUrlAttribute(): string
-    {
+public function getUrlAttribute(): string
+{
+    if (\Illuminate\Support\Facades\Storage::disk('public')->exists($this->image_path)) {
         return asset('storage/'.$this->image_path);
     }
+
+    return 'https://placehold.co/400x400?text='.urlencode($this->alt_text ?? 'Product');
+}
 }

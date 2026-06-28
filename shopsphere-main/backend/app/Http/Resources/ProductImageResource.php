@@ -13,7 +13,9 @@ class ProductImageResource extends JsonResource
         return [
             'id' => $this->id,
             'image_path' => $this->image_path,
-            'url' => Storage::disk('public')->url($this->image_path),
+            'url' => Storage::disk('public')->exists($this->image_path)
+                ? asset('storage/' . ltrim($this->image_path, '/'))
+                : 'https://placehold.co/400x400?text=' . urlencode($this->alt_text ?? 'Product'),
             'is_primary' => $this->is_primary,
         ];
     }

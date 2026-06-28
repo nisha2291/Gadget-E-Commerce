@@ -137,12 +137,11 @@ export default function ProfilePage() {
       try {
         setLoading(true);
 
-        setProfile({
-          name: user.name ?? "",
-          email: user.email ?? "",
-          phone: user.phone ?? "",
-        });
-
+       setProfile({
+  name: user?.name ?? "",
+  email: user?.email ?? "",
+  phone: user?.phone ?? "",
+});
         const addressData =
           await addressApi.list();
 

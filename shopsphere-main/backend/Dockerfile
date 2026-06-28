@@ -1,25 +1,32 @@
-FROM php:8.2-cli
+FROM php:8.3-fpm
 
 WORKDIR /var/www
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
-    zip unzip curl git libzip-dev
+    git \
+    curl \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    zip \
+    unzip
 
 # Install PHP extensions
-RUN docker-php-ext-install zip
+RUN docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Copy project files
+# Copy project
 COPY . .
 
 # Install dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Expose port
+# Permissions
+RUN chmod -R 777 storage bootstrap/cache
+
 EXPOSE 10000
 
-# Start Laravel
 CMD php artisan serve --host=0.0.0.0 --port=10000

@@ -173,8 +173,15 @@ class UpdateProductRequest extends FormRequest
             | Product images
             |--------------------------------------------------------------------------
             |
-            | Sending the images field replaces the existing image records.
-            | Each image_path should contain a stored image path or URL.
+            | Sending new image files replaces the existing images.
+            | This matches StoreProductRequest's file-upload rules
+            | so the edit form can re-use the same images[] input.
+            |
+            | NOTE: if you still need to support the old JSON-based
+            | image syncing (image_path/is_primary objects) for any
+            | other client, that would need a separate field name
+            | (e.g. "image_data") since a field can't be validated
+            | as both a file and an array of objects at the same time.
             |
             */
 
@@ -182,21 +189,14 @@ class UpdateProductRequest extends FormRequest
                 'sometimes',
                 'nullable',
                 'array',
+                'max:8',
             ],
 
             'images.*' => [
-                'array',
-            ],
-
-            'images.*.image_path' => [
-                'required',
-                'string',
-                'max:2048',
-            ],
-
-            'images.*.is_primary' => [
-                'sometimes',
-                'boolean',
+                'file',
+                'image',
+                'mimes:jpg,jpeg,png,webp',
+                'max:4096',
             ],
 
             /*
@@ -283,8 +283,17 @@ class UpdateProductRequest extends FormRequest
             'sku.unique' =>
                 'Another product is already using this SKU.',
 
-            'images.*.image_path.required' =>
-                'Every product image must contain an image path.',
+            'images.max' =>
+                'You may upload a maximum of 8 images.',
+
+            'images.*.image' =>
+                'Every uploaded file must be an image.',
+
+            'images.*.mimes' =>
+                'Images must be JPG, JPEG, PNG, or WebP.',
+
+            'images.*.max' =>
+                'Each image must not be larger than 4 MB.',
 
             'variants.*.variant_name.required' =>
                 'Every variant must contain a variant name.',

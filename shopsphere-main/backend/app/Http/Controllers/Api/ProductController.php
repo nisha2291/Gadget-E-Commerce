@@ -251,128 +251,172 @@ class ProductController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | Display one product
+    | Display products (admin)
+    |--------------------------------------------------------------------------
+    |
+    | Unlike index(), this returns products of every status
+    | (active, draft, archived) for the admin product list.
+    |
+    */
+
+    public function adminIndex(Request $request): JsonResponse
+    {
+        $query = Product::query()
+            ->with([
+                'category',
+                'categories',
+                'images',
+                'variants',
+                'approvedReviews',
+            ])
+            ->withCount('approvedReviews');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Search
+        |--------------------------------------------------------------------------
+        */
+
+        $search = trim(
+            (string) $request->query('search', ''),
+        );
+
+        if ($search !== '') {
+            $query->where(function ($productQuery) use ($search) {
+                $productQuery
+                    ->where('name', 'like', "%{$search}%")
+                    ->orWhere('brand', 'like', "%{$search}%")
+                    ->orWhere('sku', 'like', "%{$search}%")
+                    ->orWhere(
+                        'description',
+                        'like',
+                        "%{$search}%",
+                    );
+            });
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Status filter
+        |--------------------------------------------------------------------------
+        */
+
+        $status = trim(
+            (string) $request->query('status', ''),
+        );
+
+        if ($status !== '') {
+            $query->where('status', $status);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Sorting
+        |--------------------------------------------------------------------------
+        */
+
+        $allowedSortFields = [
+            'id',
+            'name',
+            'price',
+            'stock_qty',
+            'created_at',
+            'updated_at',
+        ];
+
+        $sortBy = (string) $request->query(
+            'sort_by',
+            'created_at',
+        );
+
+        if (!in_array($sortBy, $allowedSortFields, true)) {
+            $sortBy = 'created_at';
+        }
+
+        $sortDirection = strtolower(
+            (string) $request->query(
+                'sort_direction',
+                'desc',
+            ),
+        );
+
+        if (!in_array($sortDirection, ['asc', 'desc'], true)) {
+            $sortDirection = 'desc';
+        }
+
+        $perPage = max(
+            1,
+            min(
+                $request->integer('per_page', 15),
+                100,
+            ),
+        );
+
+        $products = $query
+            ->orderBy($sortBy, $sortDirection)
+            ->paginate($perPage);
+
+        return response()->json([
+            'data' => ProductResource::collection(
+                $products,
+            ),
+
+            'meta' => [
+                'current_page' =>
+                    $products->currentPage(),
+
+                'last_page' =>
+                    $products->lastPage(),
+
+                'per_page' =>
+                    $products->perPage(),
+
+                'total' =>
+                    $products->total(),
+            ],
+        ]);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Display one product (storefront)
     |--------------------------------------------------------------------------
     */
-    public function adminIndex(Request $request): JsonResponse
-{
-    $query = Product::query()
-        ->with([
+
+    public function show(
+        Product $product,
+    ): JsonResponse {
+        $product->load([
             'category',
             'categories',
             'images',
             'variants',
             'approvedReviews',
-        ])
-        ->withCount('approvedReviews');
+        ]);
 
-    /*
-    |--------------------------------------------------------------------------
-    | Search
-    |--------------------------------------------------------------------------
-    */
+        $product->loadCount(
+            'approvedReviews',
+        );
 
-    $search = trim(
-        (string) $request->query('search', ''),
-    );
-
-    if ($search !== '') {
-        $query->where(function ($productQuery) use ($search) {
-            $productQuery
-                ->where('name', 'like', "%{$search}%")
-                ->orWhere('brand', 'like', "%{$search}%")
-                ->orWhere('sku', 'like', "%{$search}%")
-                ->orWhere(
-                    'description',
-                    'like',
-                    "%{$search}%",
-                );
-        });
+        return response()->json([
+            'data' => new ProductResource(
+                $product,
+            ),
+        ]);
     }
 
     /*
     |--------------------------------------------------------------------------
-    | Status filter
+    | Display one product (admin)
     |--------------------------------------------------------------------------
+    |
+    | Used by the admin Edit Product page. Unlike show(), this is
+    | explicitly reachable regardless of product status (active,
+    | draft, or archived) so admins can edit any product.
+    |
     */
 
-    $status = trim(
-        (string) $request->query('status', ''),
-    );
-
-    if ($status !== '') {
-        $query->where('status', $status);
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Sorting
-    |--------------------------------------------------------------------------
-    */
-
-    $allowedSortFields = [
-        'id',
-        'name',
-        'price',
-        'stock_qty',
-        'created_at',
-        'updated_at',
-    ];
-
-    $sortBy = (string) $request->query(
-        'sort_by',
-        'created_at',
-    );
-
-    if (!in_array($sortBy, $allowedSortFields, true)) {
-        $sortBy = 'created_at';
-    }
-
-    $sortDirection = strtolower(
-        (string) $request->query(
-            'sort_direction',
-            'desc',
-        ),
-    );
-
-    if (!in_array($sortDirection, ['asc', 'desc'], true)) {
-        $sortDirection = 'desc';
-    }
-
-    $perPage = max(
-        1,
-        min(
-            $request->integer('per_page', 15),
-            100,
-        ),
-    );
-
-    $products = $query
-        ->orderBy($sortBy, $sortDirection)
-        ->paginate($perPage);
-
-    return response()->json([
-        'data' => ProductResource::collection(
-            $products,
-        ),
-
-        'meta' => [
-            'current_page' =>
-                $products->currentPage(),
-
-            'last_page' =>
-                $products->lastPage(),
-
-            'per_page' =>
-                $products->perPage(),
-
-            'total' =>
-                $products->total(),
-        ],
-    ]);
-}
-
-    public function show(
+    public function adminShow(
         Product $product,
     ): JsonResponse {
         $product->load([
@@ -608,6 +652,47 @@ public function store(
                 $product,
                 $data,
             );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Replace product images
+        |--------------------------------------------------------------------------
+        |
+        | If new images were uploaded, delete the old image
+        | files and rows, then store the new ones.
+        |
+        */
+
+        if ($request->hasFile('images')) {
+            foreach ($product->images as $existingImage) {
+                Storage::disk('public')->delete(
+                    $existingImage->image_path,
+                );
+            }
+
+            $product->images()->delete();
+
+            $uploadedImages = $request->file(
+                'images',
+                [],
+            );
+
+            foreach (
+                $uploadedImages as $index => $image
+            ) {
+                $imagePath = $image->store(
+                    'products',
+                    'public',
+                );
+
+                $product->images()->create([
+                    'image_path' => $imagePath,
+                    'alt_text' => $product->name,
+                    'is_primary' => $index === 0,
+                    'sort_order' => $index,
+                ]);
+            }
         }
 
         $product->load([

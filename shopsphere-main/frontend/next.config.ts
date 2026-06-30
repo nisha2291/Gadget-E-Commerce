@@ -1,22 +1,3 @@
-// import type { NextConfig } from "next";
-
-// const nextConfig: NextConfig = {
-//   images: {
-//     dangerouslyAllowLocalIP: true,
-//     remotePatterns: [
-//       {
-//         protocol: "http",
-//         hostname: "localhost",
-//         port: "8000",
-//         pathname: "/storage/**",
-//       },
-//     ],
-//   },
-// };
-
-// export default nextConfig;
-
-
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -39,6 +20,14 @@ const nextConfig: NextConfig = {
         hostname: "127.0.0.1",
         port: "8000",
         pathname: "/storage/**",
+      },
+      {
+        /*
+         * Placeholder image fallback used when a product
+         * has no uploaded image yet.
+         */
+        protocol: "https",
+        hostname: "placehold.co",
       },
     ],
   },
